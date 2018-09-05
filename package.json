@@ -23,6 +23,9 @@
     "jest": "^23.5.0"
   },
   "dependencies": {
-    "markdown-it": "^8.4.2"
+    "commander": "^2.17.1",
+    "bin": "index.js",
+    "markdown-it": "^8.4.2",
+    "node-fetch": "^2.2.0"
   }
 }
