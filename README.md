@@ -7,13 +7,13 @@ El módulo mdLinks, recibe dos atributos:
 1. path. Que es la ruta del archivo a revisar.
 2. options. validate, stats o ambas. Las cuales nos dan información sobre los links encontrados en el archivo.
 
-Si por alguna razón no se selecciona alguna opción se analizara el archivo y como resultado obtendremos un arreglo de objetos con la información de los links encontrados (href, texto, path)
+Si por alguna razón no se selecciona alguna opción se analizará el archivo y como resultado obtendremos un arreglo de objetos con la información de los links encontrados (href, texto, path)
 
-Si se elige la opción validate, el arreglo incluira un status que mostrará el resultado de la consulta del link.
+Si se elige la opción validate, el arreglo incluirá un status que mostrará el resultado de la consulta del link.
 
-Con la opción stats, tendremos las estadisticas de los links, cuantos son y cuantos estan correctos y responden al llamado de fetch.
+Con la opción stats, tendremos las estadisticas de los links, cuántos son y cuántos estan correctos y responden al llamado de fetch.
 
-Si se eligen ambas mostrara la información total de links encontrados, cuantos responden ok y cuantos estan rotos.
+Si se eligen ambas mostrará la información total de links encontrados, cuantos responden ok y cuántos están rotos.
 
 ## Instalación
 
