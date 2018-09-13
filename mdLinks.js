@@ -25,8 +25,8 @@ mdLinks(file)
   .then(result => createArray(result))
   .then(result => createPropertyStatus(result))
   .then(result => optionValidate(result))
-  .then(result => optionStats(result))
   .then(result => optionStatsAndValidate(result))
+  .then(result => optionStats(result))
   .catch(err => {
     console.log('Ocurrio un error', err);
   });
@@ -104,49 +104,33 @@ function optionValidate(arrayLinksStatus){
   })
 }
 
-// // Valida los status de links
-// function optionValidate(arrayLinksStatus){
-//   return new Promise((resolve, reject) => {
-//     if(!arrayLinksStatus) return reject('No se creo la propiedad status');
-//     arrayLinksStatus.forEach(link => {
-//       fetch(link.href)
-//         .then(response => {
-//           link.status = `${response.status} ${response.statusText}`
-//           // console.log(arrayLinksStatus)
-//           // return resolve(arrayLinksStatus)
-//           // return resolve(optionStats(arrayLinksStatus));
-//       });
-//     });
-//     // Cierra for
-//   });
-// };
-
 // Con el resultado de la función optionValidate se realizan las estadisticas de los links. Stats: true
-function optionStats(arrayLinksStatus) {
+function optionStatsAndValidate(arrayLinksStatus) {
   console.log(arrayLinksStatus)
   return new Promise((resolve, reject) => {
-    if (!arrayLinksStatus) return reject('No eligio la opción stats');
+    if (!arrayLinksStatus) return reject('No eligio la opción stats and validate');
     let unique = 0;
     let broken = 0;
     arrayLinksStatus.forEach(link => {
-      if (link.status === 'Ok 200') {
+      if (link.status === '200 OK') {
         unique++;
       } else {
         broken++;
       }
     });
-    const arrayStats = [{total: arrayLinksStatus.length, unique, broken}]
-    console.log(arrayStats)
-    return resolve(arrayStats)
+    const arrayStatsValidate = [{total: arrayLinksStatus.length, unique, broken}]
+    console.log(arrayStatsValidate)
+    return resolve(arrayStatsValidate)
   });  
 };
 
 
 // Función para contar links correctos y rotos resultado de stats: true, validate:true
-function optionStatsAndValidate(arrayStats) {
-  console.log(arrayStats)
+function optionStats(arrayStatsValidate) {
   return new Promise((resolve, reject) => {
-    if (!arrayStats) return reject('No paso el arreglo de stats');
+    if (!arrayStatsValidate) return reject('No paso el arreglo de stats');
+    const arrayStats = [{total: arrayStatsValidate[0].total, unique: arrayStatsValidate[0].unique}]
+    console.log(arrayStats)
     return resolve(arrayStats);
   });  
 };
