@@ -1,5 +1,27 @@
 # Markdown Links
 
+Markdown Links, es una librería que nos permite revisar los archivos de texto plano para encontrar links (vínculos/ligas) que muchas veces están rotos o ya no son válidos.
+
+El módulo mdLinks, recibe dos atributos:
+
+1. path. Que es la ruta del archivo a revisar.
+2. options. validate, stats o ambas. Las cuales nos dan información sobre los links encontrados en el archivo.
+
+Si por alguna razón no se selecciona alguna opción se analizara el archivo y como resultado obtendremos un arreglo de objetos con la información de los links encontrados (href, texto, path)
+
+Si se elige la opción validate, el arreglo incluira un status que mostrará el resultado de la consulta del link.
+
+Con la opción stats, tendremos las estadisticas de los links, cuantos son y cuantos estan correctos y responden al llamado de fetch.
+
+Si se eligen ambas mostrara la información total de links encontrados, cuantos responden ok y cuantos estan rotos.
+
+## Instalación
+
+Realiza un npm install githubname/reponame para instalar directamente desde github.
+
+O bien directamente desde npm con el comando:
+
+
 ## Preámbulo
 
 [Markdown](https://es.wikipedia.org/wiki/Markdown) es un lenguaje de marcado
