@@ -4,15 +4,15 @@ const md = require('markdown-it')();
 const jsdom = require('jsdom');
 const {JSDOM} = jsdom;
 const fetch = require('node-fetch');
-
 const file = './README.md';
 
+// Verifica que exista una ruta
 const mdLinks = (file) => {
   return new Promise((resolve, reject) => {
-    if (file) {
-      resolve(file);
-    } else {
+    if (!file) {
       reject('Error en MDLINKS');
+    } else {
+      resolve(file);
     }
   });
 };
@@ -22,6 +22,8 @@ mdLinks(file)
   .then(result => readFile(result))
   .then(result => renderData(result))
   .then(result => searchLinks(result))
+  .then(result => createArray(result))
+  .then(result => createPropertyStatus(result))
   .then(result => optionValidate(result))
   .then(result => optionStats(result))
   .then(result => optionStatsAndValidate(result))
@@ -32,12 +34,12 @@ mdLinks(file)
 // Verifica la ruta y la convierte en absoluta.
 function route(file) {
   return new Promise((resolve, reject) => {
-    if (!file) return reject('Error en route');
-    return resolve(path.resolve(file));
+    if (!file)  return reject('Error en route');
+     return resolve(path.resolve(file));
   });
 };
 
-// Lee un archivo md y lo convierte al formato utf8.
+// Lee un archivo y lo convierte al formato utf8(data).
 function readFile(file) {
   return new Promise((resolve, reject) => {
     fs.readFile(file, 'utf8', (error, data) => {
@@ -55,61 +57,75 @@ function renderData(data) {
   });
 };
 
-// La Data con ayuda de JSDOM  que convierte el HTML en un objeto, se solicitan todas las etiquetas de tipo <a>
-// y después se iteran para sacar la información que se necesita la cual se va colocando en un objeto para formar
-// un arreglo.
+// Convierte la data en un objeto y busca todas las etiquetas <a>
 function searchLinks(dataHtml) {
   return new Promise((resolve, reject) => {
     if (!dataHtml) return reject('Error al convertir la data a Html');
-    const arrayLinks = [];
-    const dom = new JSDOM(`${dataHtml}`);
-    const tags = dom.window.document.querySelectorAll('a[href]');
-    for (let i = 0; i < tags.length; i++) {
-      let objectLink = {
-        href: tags[i].href,
-        text: tags[i].textContent,
-        file: path.resolve(file)
-      };
-      arrayLinks.push(objectLink);
-    }
-    console.log(arrayLinks);
-    return resolve(arrayLinks);
+    const tags = new JSDOM(`${dataHtml}`).window.document.querySelectorAll('a[href]');
+    return resolve(tags);
   }); 
 };
 
-// Con el resultado de la función searchLinks se realiza un map y por medio de Object.defineProperty se establece
-// la nueva propiedad que contendrá este nuevo arreglo. Después se itera el arreglo para agregar el status.
-function optionValidate(arrayLinks) {
+// Crea un arreglo de objetos con el objeto de etiquetas
+function createArray(tags) {
   return new Promise((resolve, reject) => {
-    if ('No tiene opciónValidate') return reject('No eligió la opción');
+    if (!tags) return reject('Error en el arreglo de etiquetas');
+    let arrayLinks = [];
+    for (let tag of tags) {
+      arrayLinks.push({href: tag.href, text: tag.textContent, file: path.resolve(file)});
+    }
+    return resolve(arrayLinks);
+    });
+};
+
+
+// Crea una nueva propiedad a los objetos del arreglo en un nuevo arreglo.
+function createPropertyStatus(arrayLinks) {
+  return new Promise((resolve, reject) => {
+    if (!arrayLinks) return reject('No eligió la opción validate');
     let arrayLinksStatus = arrayLinks.map(function(obj) {
-      return Object.defineProperty(obj, 'status', {
-        value: '',
-        writable: true,
-        enumerable: true,
-        configurable: true
-      });
-      // return {status : '', ...obj}
+      return {...obj, status : ''}
     });
-    arrayLinksStatus.forEach(link => {
-      fetch(link.href)
-        .then(res => {
-          if (res.status === 404) {
-            link.status = 'Fail 404';
-          } else {
-            link.status = 'Ok 200';
-          }
-          return resolve(arrayLinksStatus);
-        });
-    });
+    return resolve(arrayLinksStatus);
   });
 };
 
+// Función validación de links
+function optionValidate(arrayLinksStatus){
+  return new Promise((resolve, reject) => {
+    if(!arrayLinksStatus) return reject('No se creo la opción status');
+    const arrayLinksValidate = arrayLinksStatus.map(url => fetch(url));
+    Promise.all(arrayLinksValidate)
+    .then(function(arrayOfResults){
+      arrayOfResults.forEach(response => 
+        arrayLinksStatus.forEach(link => link.status = `${response.status} ${response.statusText}`));
+        return resolve(arrayLinksStatus)
+    })
+  })
+}
+
+// // Valida los status de links
+// function optionValidate(arrayLinksStatus){
+//   return new Promise((resolve, reject) => {
+//     if(!arrayLinksStatus) return reject('No se creo la propiedad status');
+//     arrayLinksStatus.forEach(link => {
+//       fetch(link.href)
+//         .then(response => {
+//           link.status = `${response.status} ${response.statusText}`
+//           // console.log(arrayLinksStatus)
+//           // return resolve(arrayLinksStatus)
+//           // return resolve(optionStats(arrayLinksStatus));
+//       });
+//     });
+//     // Cierra for
+//   });
+// };
+
 // Con el resultado de la función optionValidate se realizan las estadisticas de los links. Stats: true
 function optionStats(arrayLinksStatus) {
+  console.log(arrayLinksStatus)
   return new Promise((resolve, reject) => {
-    if ('No tiene opción Stats') return reject('No eligio la opción stats');
-    const arrayStats = [];
+    if (!arrayLinksStatus) return reject('No eligio la opción stats');
     let unique = 0;
     let broken = 0;
     arrayLinksStatus.forEach(link => {
@@ -119,39 +135,20 @@ function optionStats(arrayLinksStatus) {
         broken++;
       }
     });
-    const total = unique + broken;
-    const objectStat = {
-      total: total,
-      unique: unique,
-      broken: broken
-    };
-    arrayStats.push(objectStat);
-    return resolve(arrayStats);
+    const arrayStats = [{total: arrayLinksStatus.length, unique, broken}]
+    console.log(arrayStats)
+    return resolve(arrayStats)
   });  
 };
 
 
 // Función para contar links correctos y rotos resultado de stats: true, validate:true
-function optionStats(arrayLinksStatus) {
+function optionStatsAndValidate(arrayStats) {
+  console.log(arrayStats)
   return new Promise((resolve, reject) => {
-    if ('No tiene opción Stats') return reject('No eligio la opción stats');
-    const arrayStats = [];
-    let unique = 0;
-    let broken = 0;
-    arrayLinksStatus.forEach(link => {
-      if (link.status === 'Ok 200') {
-        unique++;
-      } else {
-        broken++;
-      }
-    });
-    const total = unique + broken;
-    const objectStat = {
-      total: total,
-      unique: unique,
-      broken: broken
-    };
-    arrayStats.push(objectStat);
+    if (!arrayStats) return reject('No paso el arreglo de stats');
     return resolve(arrayStats);
   });  
 };
+
+module.exports =  mdLinks;

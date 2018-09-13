@@ -1,5 +1,7 @@
 #! / usr / bin / env node
 
+const mdLinks = require('./mdLinks');
+
 // Captura de argumentos
 const args = process.argv.slice(2);
 console.log(args)
