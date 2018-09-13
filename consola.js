@@ -94,6 +94,7 @@ const optionValidate = (arrayLinks) => {
 
 // Función para contar links correctos y rotos resultado de stats: true
 const statsLinks = (arrayLinksStatus) => {
+  console.log(arrayLinksStatus)
   const arrayStats =[];
   let unique = 0;
   let broken = 0;
@@ -111,7 +112,7 @@ const statsLinks = (arrayLinksStatus) => {
     broken : broken
   }
   arrayStats.push(objectStat)
-  console.log(arrayStats[0].total)
+  // console.log(arrayStats[0].total)
 };
 
 // Función para contar links correctos y rotos resultado de stats: true, validate:true
